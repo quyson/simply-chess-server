@@ -3,6 +3,7 @@ import morgan from "morgan";
 import sql from "mssql";
 import SqlConfig from "./interface/sqlConfig";
 import dotenv from "dotenv";
+import "reflect-metadata";
 
 const app = express();
 dotenv.config();

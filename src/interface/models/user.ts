@@ -6,12 +6,13 @@ type Rank =
   | "Gold"
   | "Platinum"
   | "Ruby"
-  | "Saphire"
+  | "Sapphire"
   | "Emerald"
   | "Pearl"
   | "Diamond";
 
 interface User {
+  id: number;
   username: string;
   password: string;
   elo: number;
