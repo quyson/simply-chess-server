@@ -4,12 +4,34 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const morgan_1 = __importDefault(require("morgan"));
+const dotenv_1 = __importDefault(require("dotenv"));
 const app = (0, express_1.default)();
-const sql = require("msnodesqlv8");
-app.use((0, morgan_1.default)("dev"));
-const connectionString = "server=.;Database=Master;Trusted_Connection=Yes;Driver={SQL Server Native Client 11.0}";
-const query = "SELECT name FROM sys.databases";
-sql.query(connectionString, query, (err, rows) => {
-    console.log(rows);
-});
+dotenv_1.default.config();
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PWD;
+const dbName = process.env.DB_NAME;
+const serverName = process.env.SERVER_NAME;
+const sqlConfig = {
+    user: dbUser,
+    password: dbPassword,
+    database: dbName,
+    server: serverName,
+    pool: {
+        max: 10,
+        min: 0,
+        idleTimeoutMillis: 30000,
+    },
+    options: {
+        encrypt: true,
+        trustServerCertificate: true,
+    },
+};
+/*async () => {
+  try {
+    await sql.connect(sqlConfig);
+    const result = await sql.query`select * from mytable where id = ${value}`;
+    console.dir(result);
+  } catch (err) {
+    // ... error checks
+  }
+};*/

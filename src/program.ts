@@ -1,16 +1,39 @@
 import express from "express";
 import morgan from "morgan";
-import { SqlClient } from "msnodesqlv8/types";
+import sql from "mssql";
+import SqlConfig from "./interface/sqlConfig";
+import dotenv from "dotenv";
 
 const app = express();
-const sql: SqlClient = require("msnodesqlv8");
+dotenv.config();
 
-app.use(morgan("dev"));
+const dbUser: string = process.env.DB_USER as string;
+const dbPassword: string = process.env.DB_PWD as string;
+const dbName: string = process.env.DB_NAME as string;
+const serverName: string = process.env.SERVER_NAME as string;
 
-const connectionString =
-  "server=.;Database=Master;Trusted_Connection=Yes;Driver={SQL Server Native Client 11.0}";
-const query = "SELECT name FROM sys.databases";
+const sqlConfig: SqlConfig = {
+  user: dbUser,
+  password: dbPassword,
+  database: dbName,
+  server: serverName,
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000,
+  },
+  options: {
+    encrypt: true,
+    trustServerCertificate: true,
+  },
+};
 
-sql.query(connectionString, query, (err, rows) => {
-  console.log(rows);
-});
+/*async () => {
+  try {
+    await sql.connect(sqlConfig);
+    const result = await sql.query`select * from mytable where id = ${value}`;
+    console.dir(result);
+  } catch (err) {
+    // ... error checks
+  }
+};*/
