@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 
-enum Rank {
+export enum Rank {
   Wood = "Wood",
   Iron = "Iron",
   Bronze = "Bronze",

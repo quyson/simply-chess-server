@@ -8,7 +8,7 @@ const app = express();
 dotenv.config();
 
 const dbUser: string = process.env.DB_USER as string;
-const dbPassword: string = process.env.DB_PWD as string;
+const dbPassword: undefined = process.env.DB_PWD as undefined;
 const dbName: string = process.env.DB_NAME as string;
 const serverName: string = process.env.SERVER_NAME as string;
 
@@ -19,6 +19,7 @@ const AppDataSource = new DataSource({
   username: dbUser,
   password: dbPassword,
   database: dbName,
+  entities: ["UserEntity", "MatchEntity"],
 });
 
 AppDataSource.initialize()
@@ -28,3 +29,7 @@ AppDataSource.initialize()
   .catch((err) => {
     console.error("Error during Data Source initialization", err);
   });
+
+export default AppDataSource;
+app.listen(8000);
+app.use(morgan("dev"));
