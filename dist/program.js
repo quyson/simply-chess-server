@@ -21,6 +21,7 @@ const AppDataSource = new typeorm_1.DataSource({
     username: dbUser,
     password: dbPassword,
     database: dbName,
+    entities: ["UserEntity", "MatchEntity"],
 });
 AppDataSource.initialize()
     .then(() => {
@@ -29,5 +30,6 @@ AppDataSource.initialize()
     .catch((err) => {
     console.error("Error during Data Source initialization", err);
 });
+exports.default = AppDataSource;
 app.listen(8000);
 app.use((0, morgan_1.default)("dev"));
