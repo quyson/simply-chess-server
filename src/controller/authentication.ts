@@ -10,7 +10,11 @@ import CustomError from "../config/error";
 
 const secretOrKey = process.env.SECRET_KEY;
 
-const register = async (req: Request, res: Response, next: NextFunction) => {
+const register = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const userRepository = AppDataSource.getRepository(UserEntity);
   const foundUser = await userRepository.findOne({
     where: { username: req.body.username },
@@ -42,7 +46,11 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     });
 };
 
-const Login = async (req: Request, res: Response, next: NextFunction) => {
+const Login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const userRepository = AppDataSource.getRepository(UserEntity);
   const result = await userRepository.findOne({
     where: { username: req.body.username },
@@ -58,7 +66,7 @@ const Login = async (req: Request, res: Response, next: NextFunction) => {
   if (match) {
     const payload = { id: result!.id, username: result!.username };
     const token: string = jwt.sign(payload, secretOrKey, { expiresIn: "1d" });
-    return res.status(200).send({
+    res.status(200).send({
       message: "Logged in successfully",
       token: "Bearer " + token,
     });
