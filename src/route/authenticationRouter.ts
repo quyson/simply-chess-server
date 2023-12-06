@@ -31,3 +31,5 @@ function isLoggedIn(req: Request, res: Response, next: NextFunction) {
 
 router.post("/signup", authentication.signup);
 router.post("/login", authentication.login);
+
+module.exports = router;

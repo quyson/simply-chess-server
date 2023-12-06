@@ -2,6 +2,10 @@ import express from "express";
 import morgan from "morgan";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
+const cors = require("cors");
+const apiRouter = require("./route/authenticationRouter");
+const passport = require("passport");
+const session = require("express-session");
 import "reflect-metadata";
 
 const app = express();
@@ -33,3 +37,14 @@ AppDataSource.initialize()
 export default AppDataSource;
 app.listen(8000);
 app.use(morgan("dev"));
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+/*app.use(
+  session({ secret: sessionSecret, resave: false, saveUninitialized: true })
+);*/
+
+app.use(passport.initialize());
+app.use(passport.session());
+require("./config/passport");
+
+app.use(apiRouter);
