@@ -1,12 +1,13 @@
-const bcrypt = require("bcryptjs");
+import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
-const jwt = require("jsonwebtoken");
-import AppDataSource from "../program";
+import jwt from "jsonwebtoken";
+import AppDataSource from "../database/appDataSource";
 import { UserEntity } from "../entity/userEntity";
 import { Rank } from "../entity/userEntity";
 import User from "../interface/models/user";
-require("dotenv").config();
 import CustomError from "../config/error";
+import dotenv from "dotenv";
+dotenv.config();
 
 const secretOrKey = process.env.SECRET_KEY;
 
@@ -46,7 +47,7 @@ const register = async (
     });
 };
 
-const Login = async (
+const login = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -65,7 +66,7 @@ const Login = async (
   );
   if (match) {
     const payload = { id: result!.id, username: result!.username };
-    const token: string = jwt.sign(payload, secretOrKey, { expiresIn: "1d" });
+    const token: string = jwt.sign(payload, secretOrKey!, { expiresIn: "1d" });
     res.status(200).send({
       message: "Logged in successfully",
       token: "Bearer " + token,
@@ -76,4 +77,4 @@ const Login = async (
   }
 };
 
-export { register, Login };
+export { register, login };

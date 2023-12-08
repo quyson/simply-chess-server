@@ -1,6 +1,7 @@
-const express = require("express");
-const passport = require("passport");
-const authentication = require("../controller/authentication");
+import "./config/passport";
+import express from "express";
+import passport from "passport";
+import { register, login } from "../controller/authentication";
 import { UserEntity } from "../entity/userEntity";
 import { Request, Response, NextFunction } from "express";
 
@@ -29,7 +30,7 @@ function isLoggedIn(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-router.post("/signup", authentication.signup);
-router.post("/login", authentication.login);
+router.post("/signup", register);
+router.post("/login", login);
 
-module.exports = router;
+export default router;
