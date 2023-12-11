@@ -1,36 +1,34 @@
 import "./config/passport";
 import express from "express";
-import passport from "passport";
 import { register, login } from "../controller/authentication";
 import { UserEntity } from "../entity/userEntity";
+import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
+import CustomError from "../config/error";
 
 const router = express.Router();
 
-function isLoggedIn(req: Request, res: Response, next: NextFunction) {
-  if (req.isAuthenticated()) {
-    return next();
-  } else {
-    passport.authenticate(
-      "jwt",
-      { session: false },
-      (err: unknown, user: UserEntity, info: unknown) => {
+const secretOrKey: string = process.env.SECRET_KEY as string;
+
+const Authenticate = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers["authorization"];
+  if (authHeader) {
+    const token = authHeader.split(" ")[1];
+    if (token) {
+      jwt.verify(token, secretOrKey, (err, decoded) => {
         if (err) {
-          return next(err);
-        }
-        if (!user) {
-          console.log("Can't find User");
-          return next(err);
+          next(err);
         } else {
-          req.user = user;
-          return next();
+          console.log("decoded!", decoded);
+          req.body.user = decoded;
         }
-      }
-    )(req, res, next);
+      });
+    }
   }
-}
+};
 
 router.post("/signup", register);
 router.post("/login", login);
+router.post("/protected", Authenticate);
 
 export default router;

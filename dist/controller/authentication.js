@@ -12,17 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Login = exports.register = void 0;
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const program_1 = __importDefault(require("../program"));
+exports.login = exports.register = void 0;
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const appDataSource_1 = __importDefault(require("../database/appDataSource"));
 const userEntity_1 = require("../entity/userEntity");
 const userEntity_2 = require("../entity/userEntity");
-require("dotenv").config();
 const error_1 = __importDefault(require("../config/error"));
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const secretOrKey = process.env.SECRET_KEY;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const userRepository = program_1.default.getRepository(userEntity_1.UserEntity);
+    const userRepository = appDataSource_1.default.getRepository(userEntity_1.UserEntity);
     const foundUser = yield userRepository.findOne({
         where: { username: req.body.username },
     });
@@ -30,7 +31,7 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
         const err = new error_1.default("Username is already taken!", 422);
         res.status(err.status).send(err.message);
     }
-    const hashedPassword = yield bcrypt.hash(req.body.password, 10);
+    const hashedPassword = yield bcryptjs_1.default.hash(req.body.password, 10);
     const newUser = new userEntity_1.UserEntity();
     newUser.username = req.body.username;
     newUser.password = hashedPassword;
@@ -49,8 +50,8 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     });
 });
 exports.register = register;
-const Login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const userRepository = program_1.default.getRepository(userEntity_1.UserEntity);
+const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const userRepository = appDataSource_1.default.getRepository(userEntity_1.UserEntity);
     const result = yield userRepository.findOne({
         where: { username: req.body.username },
     });
@@ -58,11 +59,11 @@ const Login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         const err = new error_1.default("Cannot find User!", 404);
         res.status(err.status).send(err.message);
     }
-    const match = yield bcrypt.compare(req.body.password, result.password);
+    const match = yield bcryptjs_1.default.compare(req.body.password, result.password);
     if (match) {
         const payload = { id: result.id, username: result.username };
-        const token = jwt.sign(payload, secretOrKey, { expiresIn: "1d" });
-        return res.status(200).send({
+        const token = jsonwebtoken_1.default.sign(payload, secretOrKey, { expiresIn: "1d" });
+        res.status(200).send({
             message: "Logged in successfully",
             token: "Bearer " + token,
         });
@@ -72,4 +73,4 @@ const Login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         res.status(err.status).send(err.message);
     }
 });
-exports.Login = Login;
+exports.login = login;
