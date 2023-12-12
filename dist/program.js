@@ -9,13 +9,13 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const authenticationRouter_1 = __importDefault(require("./route/authenticationRouter"));
 require("reflect-metadata");
-const appDataSource_1 = __importDefault(require("./database/appDataSource"));
+const databaseOperations_1 = __importDefault(require("./database/databaseOperations"));
+const database_1 = __importDefault(require("./config/database"));
 const app = (0, express_1.default)();
 dotenv_1.default.config();
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
-require("./config/passport");
 app.use(authenticationRouter_1.default);
 /*const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -54,10 +54,12 @@ httpServer.listen(process.env.PORT);*/
 app.listen(process.env.PORT, () => {
     console.log("Server is RUnning!");
 });
-appDataSource_1.default.initialize()
-    .then(() => {
+(0, databaseOperations_1.default)(database_1.default).then((result) => console.log(result));
+/*AppDataSource.initialize()
+  .then(() => {
     console.log("Data Source has been initialized!");
-})
-    .catch((err) => {
+  })
+  .catch((err) => {
     console.error("Error during Data Source initialization", err);
-});
+  });
+*/

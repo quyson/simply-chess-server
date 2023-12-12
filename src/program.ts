@@ -10,13 +10,15 @@ import "reflect-metadata";
 import AppDataSource from "./database/appDataSource";
 import initializeGame from "./controller/chessLogic";
 import { Socket } from "socket.io";
+import ConnectServer from "./database/databaseOperations";
+import Config from "./interface/database";
+import config from "./config/database";
 const app = express();
 dotenv.config();
 
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-require("./config/passport");
 app.use(router);
 
 /*const httpServer = createServer(app);
@@ -56,10 +58,14 @@ httpServer.listen(process.env.PORT);*/
 app.listen(process.env.PORT, () => {
   console.log("Server is RUnning!");
 });
-AppDataSource.initialize()
+
+ConnectServer(config).then((result) => console.log(result));
+
+/*AppDataSource.initialize()
   .then(() => {
     console.log("Data Source has been initialized!");
   })
   .catch((err) => {
     console.error("Error during Data Source initialization", err);
   });
+*/

@@ -1,4 +1,3 @@
-import "./config/passport";
 import express from "express";
 import { register, login } from "../controller/authentication";
 import { UserEntity } from "../entity/userEntity";
