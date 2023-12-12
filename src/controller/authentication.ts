@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import AppDataSource from "../database/appDataSource";
+import AppDataSource from "../service/appDataSource";
 import { UserEntity } from "../entity/userEntity";
 import { Rank } from "../entity/userEntity";
 import User from "../interface/models/user";

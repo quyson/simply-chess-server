@@ -1,5 +1,4 @@
 import sql from "mssql";
-import config from "../config/database";
 import Config from "../interface/database";
 
 const ConnectServer = async (config: Config) => {
