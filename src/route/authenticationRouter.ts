@@ -1,6 +1,5 @@
 import express from "express";
 import { register, login } from "../controller/authentication";
-import { UserEntity } from "../entity/userEntity";
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import CustomError from "../config/error";

@@ -1,12 +1,12 @@
 import sql from "mssql";
 import Config from "../interface/database";
 import { Rank, User } from "../models/user";
+import Match from "../models/match";
 
 const ConnectServer = async (config: Config) => {
   try {
-    console.log("config", config);
     const result = await sql.connect(config);
-    console.log(result);
+    console.log("Successfully Connected to DB", result);
   } catch (err) {
     console.log(err);
   }
@@ -19,7 +19,7 @@ const GetUser = async (config: Config, username: string) => {
       .request()
       .input("input_parameter", sql.VarChar, username)
       .query("select * from users where username = @input_parameter");
-    const user = result.recordset[0];
+    const user: User = result.recordset[0];
     console.log("DBUSER", user);
     return user;
   } catch (err) {
@@ -56,4 +56,69 @@ const CreateUser = async (
   }
 };
 
-export { ConnectServer, GetUser, CreateUser };
+const updateAfterWin = async (
+  config: Config,
+  username: string,
+  updatedWins: number
+) => {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("inputparameter1", sql.Int, updatedWins)
+      .input("inputparameter2", sql.VarChar, username)
+      .query(
+        "update users set (wins) values(@inputparameter1) where username = @inputparameter2"
+      );
+    console.log("Update Win", result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateAfterLoss = async (
+  config: Config,
+  username: string,
+  updatedLosses: number
+) => {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("inputparameter1", sql.Int, updatedLosses)
+      .input("inputparameter2", sql.VarChar, username)
+      .query(
+        "update users set (wins) values(@inputparameter1) where username = @inputparameter2"
+      );
+    console.log("Update Loss", result);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const CreateMatch = async (config: Config, match: Match) => {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("input_parameter1", sql.VarChar, match.winner)
+      .input("input_parameter2", sql.VarChar, match.loser)
+      .input("input_parameter3", sql.Date, match.date)
+      .query(
+        "insert into matches (winner, loser, date) values(@input_parameter1, @input_parameter2, @input_parameter3)"
+      );
+    console.log(result);
+    return true;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export {
+  ConnectServer,
+  GetUser,
+  CreateUser,
+  updateAfterLoss,
+  updateAfterWin,
+  CreateMatch,
+};

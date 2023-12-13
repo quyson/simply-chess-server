@@ -7,10 +7,9 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import router from "./route/authenticationRouter";
 import "reflect-metadata";
-import AppDataSource from "./service/appDataSource";
 import initializeGame from "./controller/chessLogic";
 import { Socket } from "socket.io";
-import ConnectServer from "./service/databaseOperations";
+import { ConnectServer } from "./service/databaseOperations";
 import Config from "./interface/database";
 import config from "./config/database";
 const app = express();
@@ -59,7 +58,7 @@ app.listen(process.env.PORT, () => {
   console.log("Server is RUnning!");
 });
 
-ConnectServer(config).then((result) => console.log(result));
+ConnectServer(config);
 
 /*AppDataSource.initialize()
   .then(() => {
