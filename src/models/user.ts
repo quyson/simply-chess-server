@@ -12,6 +12,7 @@ type Rank =
   | "Diamond";
 
 class User {
+  private readonly ID?: number;
   private readonly username: string;
   private readonly password: string;
   private elo: number;
@@ -28,8 +29,16 @@ class User {
     this.rank = "Iron";
   }
 
+  public getID(): number | undefined {
+    return this.ID;
+  }
+
   public getName(): string {
     return this.username;
+  }
+
+  public getPassword(): string {
+    return this.password;
   }
 
   public getElo(): number {
@@ -97,4 +106,4 @@ class User {
   }
 }
 
-export default User;
+export { User, Rank };
