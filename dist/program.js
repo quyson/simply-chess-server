@@ -8,11 +8,23 @@ const morgan_1 = __importDefault(require("morgan"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
 const authenticationRouter_1 = __importDefault(require("./route/authenticationRouter"));
-require("reflect-metadata");
-const databaseOperations_1 = __importDefault(require("./database/databaseOperations"));
+const databaseOperations_1 = require("./service/databaseOperations");
 const database_1 = __importDefault(require("./config/database"));
 const app = (0, express_1.default)();
 dotenv_1.default.config();
+(0, databaseOperations_1.ConnectServer)(database_1.default)
+    .then((result) => {
+    console.log("DB Connected", result);
+})
+    .catch((error) => {
+    console.log("DB Error", error);
+})
+    .then((result) => {
+    app.listen(process.env.PORT, () => {
+        console.log("Server is RUnning!");
+    });
+});
+app.use(express_1.default.json());
 app.use((0, morgan_1.default)("dev"));
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
@@ -51,15 +63,3 @@ io.use((socket: CustomSocket, next) => {
 });
 
 httpServer.listen(process.env.PORT);*/
-app.listen(process.env.PORT, () => {
-    console.log("Server is RUnning!");
-});
-(0, databaseOperations_1.default)(database_1.default).then((result) => console.log(result));
-/*AppDataSource.initialize()
-  .then(() => {
-    console.log("Data Source has been initialized!");
-  })
-  .catch((err) => {
-    console.error("Error during Data Source initialization", err);
-  });
-*/

@@ -6,9 +6,9 @@ import Match from "../models/match";
 const ConnectServer = async (config: Config) => {
   try {
     const result = await sql.connect(config);
-    console.log("Successfully Connected to DB", result);
+    return result;
   } catch (err) {
-    console.log(err);
+    console.log("config error", err);
   }
 };
 
@@ -19,7 +19,7 @@ const GetUser = async (config: Config, username: string) => {
       .request()
       .input("input_parameter", sql.VarChar, username)
       .query("select * from users where username = @input_parameter");
-    const user: User = result.recordset[0];
+    const user = result.recordset[0];
     console.log("DBUSER", user);
     return user;
   } catch (err) {

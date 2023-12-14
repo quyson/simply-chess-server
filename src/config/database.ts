@@ -1,4 +1,6 @@
 import Config from "../interface/database";
+import dotenv from "dotenv";
+dotenv.config();
 
 const sqlConfig: Config = {
   user: process.env.DB_USER as string,

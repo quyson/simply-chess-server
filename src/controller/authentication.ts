@@ -20,7 +20,6 @@ const register = async (
     const err = new CustomError("Username is already taken!", 422);
     res.status(err.status).send(err.message);
   }
-
   const hashedPassword: string = await bcrypt.hash(req.body.password, 10);
   const newUser = new User(req.body.username, hashedPassword);
   const userDB = await CreateUser(
@@ -44,6 +43,7 @@ const login = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  console.log("username", req.body.username);
   const foundUser = await GetUser(sqlConfig, req.body.username);
   if (!foundUser) {
     const err = new CustomError("Cannot find User!", 404);
@@ -51,7 +51,7 @@ const login = async (
   }
   const match: boolean = await bcrypt.compare(
     req.body.password,
-    foundUser!.getPassword()
+    foundUser.password
   );
   if (match) {
     const payload = { id: foundUser!.getID(), username: foundUser!.getName() };

@@ -6,15 +6,28 @@ import { Server } from "socket.io";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import router from "./route/authenticationRouter";
-import "reflect-metadata";
+//import "reflect-metadata";
 import initializeGame from "./controller/chessLogic";
 import { Socket } from "socket.io";
 import { ConnectServer } from "./service/databaseOperations";
-import Config from "./interface/database";
-import config from "./config/database";
+import sqlConfig from "./config/database";
 const app = express();
 dotenv.config();
 
+ConnectServer(sqlConfig)
+  .then((result) => {
+    console.log("DB Connected", result);
+  })
+  .catch((error) => {
+    console.log("DB Error", error);
+  })
+  .then((result) => {
+    app.listen(process.env.PORT, () => {
+      console.log("Server is RUnning!");
+    });
+  });
+
+app.use(express.json());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
@@ -54,17 +67,3 @@ io.use((socket: CustomSocket, next) => {
 });
 
 httpServer.listen(process.env.PORT);*/
-app.listen(process.env.PORT, () => {
-  console.log("Server is RUnning!");
-});
-
-ConnectServer(config);
-
-/*AppDataSource.initialize()
-  .then(() => {
-    console.log("Data Source has been initialized!");
-  })
-  .catch((err) => {
-    console.error("Error during Data Source initialization", err);
-  });
-*/

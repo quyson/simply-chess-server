@@ -25,7 +25,13 @@ const Authenticate = (req, res, next) => {
         }
     }
 };
-router.post("/signup", authentication_1.register);
+router.post("/register", authentication_1.register);
 router.post("/login", authentication_1.login);
 router.post("/protected", Authenticate);
+router.get("/hello", (req, res, next) => {
+    res.send("YO");
+});
+router.post("/k", (req, res, next) => {
+    console.log(req.body);
+});
 exports.default = router;
