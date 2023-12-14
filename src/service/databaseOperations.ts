@@ -118,6 +118,21 @@ const CreateMatch = async (config: Config, match: Match) => {
   }
 };
 
+const deleteUser = async (config: Config, username: string) => {
+  try {
+    let pool = await sql.connect(config);
+    let result = await pool
+      .request()
+      .input("input_parameter1", sql.VarChar, username)
+      .query("delete from users where username = @input_parameter1");
+    console.log("Delete", result);
+    return true;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
 export {
   ConnectServer,
   GetUser,
