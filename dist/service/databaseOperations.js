@@ -32,7 +32,6 @@ const GetUser = (config, username) => __awaiter(void 0, void 0, void 0, function
             .input("input_parameter", mssql_1.default.VarChar, username)
             .query("select * from users where username = @input_parameter");
         const user = result.recordset[0];
-        console.log("DBUSER", user);
         return user;
     }
     catch (err) {

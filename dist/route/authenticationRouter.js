@@ -9,29 +9,34 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const router = express_1.default.Router();
 const secretOrKey = process.env.SECRET_KEY;
 const Authenticate = (req, res, next) => {
-    const authHeader = req.headers["authorization"];
-    if (authHeader) {
-        const token = authHeader.split(" ")[1];
-        if (token) {
-            jsonwebtoken_1.default.verify(token, secretOrKey, (err, decoded) => {
-                if (err) {
-                    next(err);
-                }
-                else {
-                    console.log("decoded!", decoded);
-                    req.body.user = decoded;
-                }
-            });
+    try {
+        const authHeader = req.headers["authorization"];
+        console.log(authHeader);
+        if (authHeader) {
+            const token = authHeader.split(" ")[1];
+            console.log(token);
+            if (token) {
+                jsonwebtoken_1.default.verify(token, secretOrKey, (err, decoded) => {
+                    if (err) {
+                        next(err);
+                    }
+                    else {
+                        console.log("decoded!", decoded);
+                        const username = decoded.username;
+                        req.username = username;
+                        next();
+                    }
+                });
+            }
         }
+    }
+    catch (err) {
+        console.log(err);
     }
 };
 router.post("/register", authentication_1.register);
 router.post("/login", authentication_1.login);
-router.post("/protected", Authenticate);
-router.get("/hello", (req, res, next) => {
-    res.send("YO");
-});
-router.post("/k", (req, res, next) => {
-    console.log(req.body);
+router.post("/protected", Authenticate, (req, res, next) => {
+    res.send(req.username);
 });
 exports.default = router;

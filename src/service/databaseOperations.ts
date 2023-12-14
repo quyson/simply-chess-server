@@ -2,6 +2,7 @@ import sql from "mssql";
 import Config from "../interface/database";
 import { Rank, User } from "../models/user";
 import Match from "../models/match";
+import dbUser from "../interface/dbuser";
 
 const ConnectServer = async (config: Config) => {
   try {
@@ -19,11 +20,11 @@ const GetUser = async (config: Config, username: string) => {
       .request()
       .input("input_parameter", sql.VarChar, username)
       .query("select * from users where username = @input_parameter");
-    const user = result.recordset[0];
-    console.log("DBUSER", user);
+    const user: dbUser = result.recordset[0];
     return user;
   } catch (err) {
     console.log(err);
+    throw err;
   }
 };
 
@@ -73,6 +74,7 @@ const updateAfterWin = async (
     console.log("Update Win", result);
   } catch (err) {
     console.log(err);
+    throw err;
   }
 };
 
@@ -93,6 +95,7 @@ const updateAfterLoss = async (
     console.log("Update Loss", result);
   } catch (err) {
     console.log(err);
+    throw err;
   }
 };
 
@@ -111,6 +114,7 @@ const CreateMatch = async (config: Config, match: Match) => {
     return true;
   } catch (err) {
     console.log(err);
+    throw err;
   }
 };
 

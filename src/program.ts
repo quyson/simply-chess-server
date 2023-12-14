@@ -11,6 +11,7 @@ import initializeGame from "./controller/chessLogic";
 import { Socket } from "socket.io";
 import { ConnectServer } from "./service/databaseOperations";
 import sqlConfig from "./config/database";
+import { Request, Response, NextFunction } from "express";
 const app = express();
 dotenv.config();
 
@@ -32,6 +33,16 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(router);
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("Error:", err);
+
+  if (err instanceof jwt.JsonWebTokenError) {
+    res.status(401).json({ message: "Invalid token" });
+  } else {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 /*const httpServer = createServer(app);
 const io = new Server(httpServer, {

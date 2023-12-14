@@ -23,13 +23,11 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const secretOrKey = process.env.SECRET_KEY;
 const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req.body.username, req.body.password);
     const foundUser = yield (0, databaseOperations_1.GetUser)(database_1.default, req.body.username);
     if (foundUser) {
         const err = new error_1.default("Username is already taken!", 422);
         res.status(err.status).send(err.message);
     }
-    console.log("Did not find user, will register now!");
     const hashedPassword = yield bcryptjs_1.default.hash(req.body.password, 10);
     const newUser = new user_1.User(req.body.username, hashedPassword);
     const userDB = yield (0, databaseOperations_1.CreateUser)(database_1.default, newUser.getName(), hashedPassword, newUser.getElo(), newUser.getWins(), newUser.getLosses(), newUser.getRank());
@@ -42,15 +40,14 @@ const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.register = register;
 const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("username", req.body.username);
     const foundUser = yield (0, databaseOperations_1.GetUser)(database_1.default, req.body.username);
     if (!foundUser) {
         const err = new error_1.default("Cannot find User!", 404);
         res.status(err.status).send(err.message);
     }
-    const match = yield bcryptjs_1.default.compare(req.body.password, foundUser.getPassword());
+    const match = yield bcryptjs_1.default.compare(req.body.password, foundUser.password);
     if (match) {
-        const payload = { id: foundUser.getID(), username: foundUser.getName() };
+        const payload = { id: foundUser.id, username: foundUser.username };
         const token = jsonwebtoken_1.default.sign(payload, secretOrKey, { expiresIn: "1d" });
         res.status(200).send({
             message: "Logged in successfully",
