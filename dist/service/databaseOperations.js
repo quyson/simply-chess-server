@@ -36,6 +36,7 @@ const GetUser = (config, username) => __awaiter(void 0, void 0, void 0, function
     }
     catch (err) {
         console.log(err);
+        throw err;
     }
 });
 exports.GetUser = GetUser;
@@ -71,6 +72,7 @@ const updateAfterWin = (config, username, updatedWins) => __awaiter(void 0, void
     }
     catch (err) {
         console.log(err);
+        throw err;
     }
 });
 exports.updateAfterWin = updateAfterWin;
@@ -86,6 +88,7 @@ const updateAfterLoss = (config, username, updatedLosses) => __awaiter(void 0, v
     }
     catch (err) {
         console.log(err);
+        throw err;
     }
 });
 exports.updateAfterLoss = updateAfterLoss;
@@ -103,6 +106,22 @@ const CreateMatch = (config, match) => __awaiter(void 0, void 0, void 0, functio
     }
     catch (err) {
         console.log(err);
+        throw err;
     }
 });
 exports.CreateMatch = CreateMatch;
+const deleteUser = (config, username) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let pool = yield mssql_1.default.connect(config);
+        let result = yield pool
+            .request()
+            .input("input_parameter1", mssql_1.default.VarChar, username)
+            .query("delete from users where username = @input_parameter1");
+        console.log("Delete", result);
+        return true;
+    }
+    catch (err) {
+        console.log(err);
+        throw err;
+    }
+});

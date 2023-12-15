@@ -15,6 +15,51 @@ import { Request, Response, NextFunction } from "express";
 const app = express();
 dotenv.config();
 
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT,
+    credentials: true,
+  },
+});
+
+interface CustomSocket extends Socket {
+  decoded?: jwt.JwtPayload;
+}
+
+io.use((socket: CustomSocket, next) => {
+  if (
+    socket.handshake.query &&
+    socket.handshake.query.token &&
+    typeof socket.handshake.query.token === "string"
+  ) {
+    const token = socket.handshake.query.token.split(" ")[1];
+    jwt.verify(token, process.env.SECRET_KEY as string, (err, decoded) => {
+      if (err) {
+        next(err);
+      }
+      if (!decoded) {
+        return next(new Error("Invalid token"));
+      }
+      socket.decoded = decoded as jwt.JwtPayload;
+      console.log("authenticated!", decoded);
+      next();
+    });
+  } else {
+    next(new Error("Authentication error"));
+  }
+}).on("connection", (socket: CustomSocket) => {
+  socket.on("joinChessRoom", () => {
+    console.log("joining!");
+    initializeGame(io, socket);
+  });
+
+  socket.on("message", (message) => {
+    console.log(message);
+    io.emit("message", message);
+  });
+});
+
 ConnectServer(sqlConfig)
   .then((result) => {
     console.log("DB Connected", result);
@@ -23,7 +68,7 @@ ConnectServer(sqlConfig)
     console.log("DB Error", error);
   })
   .then((result) => {
-    app.listen(process.env.PORT, () => {
+    httpServer.listen(process.env.PORT, () => {
       console.log("Server is RUnning!");
     });
   });
@@ -43,38 +88,3 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-/*const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CLIENT,
-  },
-});
-
-interface CustomSocket extends Socket {
-  decoded?: any;
-}
-
-io.use((socket: CustomSocket, next) => {
-  if (socket.handshake.query && socket.handshake.query.token) {
-    jwt.verify(
-      socket.handshake.query.token as string,
-      process.env.SECRET_KEY as string,
-      (err, decoded) => {
-        if (err) return next(new Error("Authentication error"));
-        socket.decoded = decoded;
-        next();
-      }
-    );
-  } else {
-    next(new Error("Authentication error"));
-  }
-}).on("connection", (socket) => {
-  // Connection now authenticated to receive further events
-  initializeGame(io, socket);
-  socket.on("message", function (message) {
-    io.emit("message", message);
-  });
-});
-
-httpServer.listen(process.env.PORT);*/
