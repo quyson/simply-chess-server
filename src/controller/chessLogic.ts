@@ -6,14 +6,10 @@ var gameSocket: Socket;
 var gamesInSession: Socket[] = [];
 
 type gameData = {
-  mySocketId: string;
-  socketId: string;
-  gameId: string;
-  username: string;
-};
-
-type socketData = {
-  socketId: string;
+  mySocketId?: string;
+  socketId?: string;
+  gameId?: string;
+  username?: string;
 };
 
 const initializeGame = (sio: Server, socket: Socket) => {
@@ -40,9 +36,9 @@ const initializeGame = (sio: Server, socket: Socket) => {
   // User joins gameRoom after going to a URL with '/game/:gameId'
   gameSocket.on("playerJoinGame", playerJoinsGame);
 
-  gameSocket.on("request username", requestUserName);
+  gameSocket.on("send username", sendUserName);
 
-  gameSocket.on("recieved userName", recievedUserName);
+  gameSocket.on("recieve userName", recieveUserName);
 };
 
 function playerJoinsGame(this: Socket, idData: gameData) {
@@ -54,7 +50,7 @@ function playerJoinsGame(this: Socket, idData: gameData) {
   var sock = this;
 
   // Look up the room ID in the Socket.IO manager object.
-  var room = io.sockets.adapter.rooms.get(idData.gameId);
+  var room = io.sockets.adapter.rooms.get(idData.gameId!);
   // console.log(room)
 
   // If the room exists...
@@ -67,16 +63,16 @@ function playerJoinsGame(this: Socket, idData: gameData) {
     idData.mySocketId = sock.id;
 
     // Join the room
-    sock.join(idData.gameId);
+    sock.join(idData.gameId!);
 
     console.log(room.size);
 
     if (room.size === 2) {
-      io.sockets.in(idData.gameId).emit("start game", idData.username);
+      io.sockets.in(idData.gameId!).emit("start game", idData.username);
     }
 
     // Emit an event notifying the clients that the player has joined the room.
-    io.sockets.in(idData.gameId).emit("playerJoinedRoom", idData);
+    io.sockets.in(idData.gameId!).emit("playerJoinedRoom", idData);
   } else {
     // Otherwise, send an error message back to the player.
     this.emit("status", "There are already 2 people playing in this room.");
@@ -100,7 +96,7 @@ function newMove(move: gameData) {
 
   const gameId = move.gameId;
 
-  io.to(gameId).emit("opponent move", move);
+  io.to(gameId!).emit("opponent move", move);
 }
 
 function onDisconnect() {
@@ -108,13 +104,12 @@ function onDisconnect() {
   gamesInSession.splice(i, 1);
 }
 
-function requestUserName(this: Socket, gameId: string) {
-  io.to(gameId).emit("give userName", this.id);
+function sendUserName(username: string, gameId: string) {
+  io.to(gameId).emit("give userName", username);
 }
 
-function recievedUserName(this: Socket, data: gameData) {
-  data.socketId = this.id;
-  io.to(data.gameId).emit("get Opponent UserName", data);
+function recieveUserName(username: string, gameId: string) {
+  io.to(gameId!).emit("get Opponent UserName", username);
 }
 
 export default initializeGame;
