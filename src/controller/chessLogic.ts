@@ -1,13 +1,20 @@
 import { Socket } from "socket.io";
 import { Server } from "socket.io";
+import {
+  CreateMatch,
+  updateAfterLoss,
+  updateAfterWin,
+} from "../service/databaseOperations";
+import Match from "../models/match";
+import sqlConfig from "../config/database";
 
 var io: Server;
 var gameSocket: Socket;
 var gamesInSession: Socket[] = [];
 
 type gameData = {
-  mySocketId?: string;
-  socketId?: string;
+  player2SocketId?: string;
+  player1SocketId?: string;
   gameId?: string;
   username?: string;
 };
@@ -38,7 +45,11 @@ const initializeGame = (sio: Server, socket: Socket) => {
 
   gameSocket.on("send username", sendUserName);
 
-  gameSocket.on("recieve userName", recieveUserName);
+  gameSocket.on("won game", wonGame);
+
+  gameSocket.on("loss game", lossGame);
+
+  //gameSocket.on("recieve userName", recieveUserName);
 };
 
 function playerJoinsGame(this: Socket, idData: gameData) {
@@ -60,7 +71,7 @@ function playerJoinsGame(this: Socket, idData: gameData) {
   }
   if (room.size < 2) {
     // attach the socket id to the data object.
-    idData.mySocketId = sock.id;
+    idData.player2SocketId = sock.id;
 
     // Join the room
     sock.join(idData.gameId!);
@@ -68,11 +79,11 @@ function playerJoinsGame(this: Socket, idData: gameData) {
     console.log(room.size);
 
     if (room.size === 2) {
-      io.sockets.in(idData.gameId!).emit("start game", idData.username);
+      io.sockets.in(idData.gameId!).emit("start game", idData);
     }
 
     // Emit an event notifying the clients that the player has joined the room.
-    io.sockets.in(idData.gameId!).emit("playerJoinedRoom", idData);
+    //io.sockets.in(idData.gameId!).emit("playerJoinedRoom", idData);
   } else {
     // Otherwise, send an error message back to the player.
     this.emit("status", "There are already 2 people playing in this room.");
@@ -104,12 +115,22 @@ function onDisconnect() {
   gamesInSession.splice(i, 1);
 }
 
-function sendUserName(username: string, gameId: string) {
-  io.to(gameId).emit("give userName", username);
+function sendUserName(gameId: string, username: string) {
+  io.to(gameId).emit("give username", username);
 }
 
-function recieveUserName(username: string, gameId: string) {
-  io.to(gameId!).emit("get Opponent UserName", username);
+async function wonGame(username: string, opponent: string) {
+  await updateAfterWin(sqlConfig, username);
+  const newMatch = new Match(username, opponent);
+  await CreateMatch(sqlConfig, newMatch);
 }
+
+async function lossGame(username: string) {
+  await updateAfterLoss(sqlConfig, username);
+}
+
+/*function recieveUserName(username: string, gameId: string) {
+  io.to(gameId!).emit("get Opponent UserName", username);
+}*/
 
 export default initializeGame;

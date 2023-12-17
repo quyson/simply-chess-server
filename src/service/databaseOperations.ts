@@ -57,19 +57,14 @@ const CreateUser = async (
   }
 };
 
-const updateAfterWin = async (
-  config: Config,
-  username: string,
-  updatedWins: number
-) => {
+const updateAfterWin = async (config: Config, username: string) => {
   try {
     let pool = await sql.connect(config);
     let result = await pool
       .request()
-      .input("inputparameter1", sql.Int, updatedWins)
       .input("inputparameter2", sql.VarChar, username)
       .query(
-        "update users set (wins) values(@inputparameter1) where username = @inputparameter2"
+        "update users set wins = wins + 1 where username = @inputparameter2"
       );
     console.log("Update Win", result);
   } catch (err) {
@@ -78,19 +73,14 @@ const updateAfterWin = async (
   }
 };
 
-const updateAfterLoss = async (
-  config: Config,
-  username: string,
-  updatedLosses: number
-) => {
+const updateAfterLoss = async (config: Config, username: string) => {
   try {
     let pool = await sql.connect(config);
     let result = await pool
       .request()
-      .input("inputparameter1", sql.Int, updatedLosses)
       .input("inputparameter2", sql.VarChar, username)
       .query(
-        "update users set (wins) values(@inputparameter1) where username = @inputparameter2"
+        "update users set loss = loss + 1 where username = @inputparameter2"
       );
     console.log("Update Loss", result);
   } catch (err) {
