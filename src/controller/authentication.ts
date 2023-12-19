@@ -63,6 +63,7 @@ const login = async (
         expiresIn: "1d",
       });
       res.status(200).send({
+        username: foundUser.username,
         message: "Logged in successfully",
         token: "Bearer " + token,
       });

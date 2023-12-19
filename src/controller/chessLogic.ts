@@ -7,6 +7,7 @@ import {
 } from "../service/databaseOperations";
 import Match from "../models/match";
 import sqlConfig from "../config/database";
+import Move from "../interface/move";
 
 var io: Server;
 var gameSocket: Socket;
@@ -35,7 +36,7 @@ const initializeGame = (sio: Server, socket: Socket) => {
   gameSocket.on("disconnect", onDisconnect);
 
   // Sends new move to the other socket session in the same room.
-  gameSocket.on("new move", newMove);
+  gameSocket.on("handle move", handleMove);
 
   // User creates new game room after clicking 'submit' on the frontend
   gameSocket.on("createNewGame", createNewGame);
@@ -56,13 +57,13 @@ function playerJoinsGame(this: Socket, idData: gameData) {
   /**
    * Joins the given socket to a session with it's gameId
    */
-
+  console.log("JOIN ROOM 1");
   // A reference to the player's Socket.IO socket object
   var sock = this;
-
+  console.log(idData.gameId);
   // Look up the room ID in the Socket.IO manager object.
   var room = io.sockets.adapter.rooms.get(idData.gameId!);
-  // console.log(room)
+  console.log(room);
 
   // If the room exists...
   if (room === undefined) {
@@ -72,14 +73,14 @@ function playerJoinsGame(this: Socket, idData: gameData) {
   if (room.size < 2) {
     // attach the socket id to the data object.
     idData.player2SocketId = sock.id;
-
     // Join the room
     sock.join(idData.gameId!);
 
     console.log(room.size);
 
     if (room.size === 2) {
-      io.sockets.in(idData.gameId!).emit("start game", idData);
+      console.log("IDDATA", idData);
+      io.sockets.in(idData.gameId!).except(sock.id).emit("start game", idData);
     }
 
     // Emit an event notifying the clients that the player has joined the room.
@@ -92,22 +93,11 @@ function playerJoinsGame(this: Socket, idData: gameData) {
 
 function createNewGame(this: Socket, gameId: string) {
   // Return the Room ID (gameId) and the socket ID (mySocketId) to the browser client
-  this.emit("createNewGame", { gameId: gameId, mySocketId: this.id });
+  console.log(this.id);
+  this.emit("createNewGame", gameId, this.id);
 
   // Join the Room and wait for the other player
   this.join(gameId);
-}
-
-function newMove(move: gameData) {
-  /**
-   * First, we need to get the room ID in which to send this message.
-   * Next, we actually send this message to everyone except the sender
-   * in this room.
-   */
-
-  const gameId = move.gameId;
-
-  io.to(gameId!).emit("opponent move", move);
 }
 
 function onDisconnect() {
@@ -115,8 +105,14 @@ function onDisconnect() {
   gamesInSession.splice(i, 1);
 }
 
-function sendUserName(gameId: string, username: string) {
-  io.to(gameId).emit("give username", username);
+function sendUserName(this: Socket, gameId: string, username: string) {
+  console.log("send information stuff", gameId, username, this.id);
+  io.to(gameId).except(this.id).emit("give username", username, gameId);
+}
+
+function handleMove(this: Socket, move: Move, gameId: string) {
+  console.log("Move", move, "gameId", gameId);
+  io.to(gameId).except(this.id).emit("opponent move", move);
 }
 
 async function wonGame(username: string, opponent: string) {
@@ -128,9 +124,5 @@ async function wonGame(username: string, opponent: string) {
 async function lossGame(username: string) {
   await updateAfterLoss(sqlConfig, username);
 }
-
-/*function recieveUserName(username: string, gameId: string) {
-  io.to(gameId!).emit("get Opponent UserName", username);
-}*/
 
 export default initializeGame;

@@ -60,14 +60,13 @@ const CreateUser = (config, username, password, elo, wins, losses, rank) => __aw
     }
 });
 exports.CreateUser = CreateUser;
-const updateAfterWin = (config, username, updatedWins) => __awaiter(void 0, void 0, void 0, function* () {
+const updateAfterWin = (config, username) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let pool = yield mssql_1.default.connect(config);
         let result = yield pool
             .request()
-            .input("inputparameter1", mssql_1.default.Int, updatedWins)
             .input("inputparameter2", mssql_1.default.VarChar, username)
-            .query("update users set (wins) values(@inputparameter1) where username = @inputparameter2");
+            .query("update users set wins = wins + 1 where username = @inputparameter2");
         console.log("Update Win", result);
     }
     catch (err) {
@@ -76,14 +75,13 @@ const updateAfterWin = (config, username, updatedWins) => __awaiter(void 0, void
     }
 });
 exports.updateAfterWin = updateAfterWin;
-const updateAfterLoss = (config, username, updatedLosses) => __awaiter(void 0, void 0, void 0, function* () {
+const updateAfterLoss = (config, username) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let pool = yield mssql_1.default.connect(config);
         let result = yield pool
             .request()
-            .input("inputparameter1", mssql_1.default.Int, updatedLosses)
             .input("inputparameter2", mssql_1.default.VarChar, username)
-            .query("update users set (wins) values(@inputparameter1) where username = @inputparameter2");
+            .query("update users set loss = loss + 1 where username = @inputparameter2");
         console.log("Update Loss", result);
     }
     catch (err) {

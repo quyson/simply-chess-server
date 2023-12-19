@@ -58,6 +58,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
                 expiresIn: "1d",
             });
             res.status(200).send({
+                username: foundUser.username,
                 message: "Logged in successfully",
                 token: "Bearer " + token,
             });
