@@ -30,7 +30,7 @@ const initializeGame = (sio, socket) => {
     // Run code when the client disconnects from their socket session.
     gameSocket.on("disconnect", onDisconnect);
     // Sends new move to the other socket session in the same room.
-    gameSocket.on("new move", newMove);
+    gameSocket.on("handle move", handleMove);
     // User creates new game room after clicking 'submit' on the frontend
     gameSocket.on("createNewGame", createNewGame);
     // User joins gameRoom after going to a URL with '/game/:gameId'
@@ -81,22 +81,17 @@ function createNewGame(gameId) {
     // Join the Room and wait for the other player
     this.join(gameId);
 }
-function newMove(move) {
-    /**
-     * First, we need to get the room ID in which to send this message.
-     * Next, we actually send this message to everyone except the sender
-     * in this room.
-     */
-    const gameId = move.gameId;
-    io.to(gameId).emit("opponent move", move);
-}
 function onDisconnect() {
     var i = gamesInSession.indexOf(gameSocket);
     gamesInSession.splice(i, 1);
 }
 function sendUserName(gameId, username) {
     console.log("send information stuff", gameId, username, this.id);
-    io.to(gameId).except(this.id).emit("give username", username);
+    io.to(gameId).except(this.id).emit("give username", username, gameId);
+}
+function handleMove(move, gameId) {
+    console.log("Move", move, "gameId", gameId);
+    io.to(gameId).except(this.id).emit("opponent move", move);
 }
 function wonGame(username, opponent) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -110,7 +105,4 @@ function lossGame(username) {
         yield (0, databaseOperations_1.updateAfterLoss)(database_1.default, username);
     });
 }
-/*function recieveUserName(username: string, gameId: string) {
-  io.to(gameId!).emit("get Opponent UserName", username);
-}*/
 exports.default = initializeGame;
