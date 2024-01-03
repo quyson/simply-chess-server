@@ -46,9 +46,9 @@ const initializeGame = (sio: Server, socket: Socket) => {
 
   gameSocket.on("send username", sendUserName);
 
-  gameSocket.on("won game", wonGame);
+  //gameSocket.on("won game", wonGame);
 
-  gameSocket.on("loss game", lossGame);
+  //gameSocket.on("loss game", lossGame);
 
   //gameSocket.on("recieve userName", recieveUserName);
 };
@@ -87,7 +87,10 @@ function playerJoinsGame(this: Socket, idData: gameData) {
     //io.sockets.in(idData.gameId!).emit("playerJoinedRoom", idData);
   } else {
     // Otherwise, send an error message back to the player.
-    this.emit("status", "There are already 2 people playing in this room.");
+    this.to(this.id).emit(
+      "status",
+      "There are already 2 people playing in this room."
+    );
   }
 }
 
@@ -110,12 +113,12 @@ function sendUserName(this: Socket, gameId: string, username: string) {
   io.to(gameId).except(this.id).emit("give username", username, gameId);
 }
 
-function handleMove(this: Socket, move: Move, gameId: string) {
+function handleMove(this: Socket, move: string, gameId: string) {
   console.log("Move", move, "gameId", gameId);
   io.to(gameId).except(this.id).emit("opponent move", move);
 }
 
-async function wonGame(username: string, opponent: string) {
+/*async function wonGame(username: string, opponent: string) {
   await updateAfterWin(sqlConfig, username);
   const newMatch = new Match(username, opponent);
   await CreateMatch(sqlConfig, newMatch);
@@ -123,6 +126,6 @@ async function wonGame(username: string, opponent: string) {
 
 async function lossGame(username: string) {
   await updateAfterLoss(sqlConfig, username);
-}
+}*/
 
 export default initializeGame;

@@ -1,20 +1,5 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const databaseOperations_1 = require("../service/databaseOperations");
-const match_1 = __importDefault(require("../models/match"));
-const database_1 = __importDefault(require("../config/database"));
 var io;
 var gameSocket;
 var gamesInSession = [];
@@ -36,8 +21,8 @@ const initializeGame = (sio, socket) => {
     // User joins gameRoom after going to a URL with '/game/:gameId'
     gameSocket.on("playerJoinGame", playerJoinsGame);
     gameSocket.on("send username", sendUserName);
-    gameSocket.on("won game", wonGame);
-    gameSocket.on("loss game", lossGame);
+    //gameSocket.on("won game", wonGame);
+    //gameSocket.on("loss game", lossGame);
     //gameSocket.on("recieve userName", recieveUserName);
 };
 function playerJoinsGame(idData) {
@@ -71,7 +56,7 @@ function playerJoinsGame(idData) {
     }
     else {
         // Otherwise, send an error message back to the player.
-        this.emit("status", "There are already 2 people playing in this room.");
+        this.to(this.id).emit("status", "There are already 2 people playing in this room.");
     }
 }
 function createNewGame(gameId) {
@@ -93,16 +78,13 @@ function handleMove(move, gameId) {
     console.log("Move", move, "gameId", gameId);
     io.to(gameId).except(this.id).emit("opponent move", move);
 }
-function wonGame(username, opponent) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield (0, databaseOperations_1.updateAfterWin)(database_1.default, username);
-        const newMatch = new match_1.default(username, opponent);
-        yield (0, databaseOperations_1.CreateMatch)(database_1.default, newMatch);
-    });
+/*async function wonGame(username: string, opponent: string) {
+  await updateAfterWin(sqlConfig, username);
+  const newMatch = new Match(username, opponent);
+  await CreateMatch(sqlConfig, newMatch);
 }
-function lossGame(username) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield (0, databaseOperations_1.updateAfterLoss)(database_1.default, username);
-    });
-}
+
+async function lossGame(username: string) {
+  await updateAfterLoss(sqlConfig, username);
+}*/
 exports.default = initializeGame;
